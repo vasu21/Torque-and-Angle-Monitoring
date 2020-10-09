@@ -1,0 +1,88 @@
+import pandas as pd
+import datetime as dt
+torque = pd.read_csv("10031 full data.csv")
+leaktest1 = torque["Record No.;Date;Time;App;Tool;Torque;TQ_min;TQ_max;PTq;Angle;AngMi;AngMax;PVT;Comp;"].str.split(";", expand = True).drop([10,11,12,13],axis = "columns")
+leaktest2 = leaktest1.rename(mapper = {0 : "Record No", 1 : "Date", 2 : "Time", 3 : "App", 4 : "Tool", 5 : "Torque", 6 : "TQ_min", 7 : "TQ_max", 8 : "PTorque", 9 : "Angle"}, axis = "columns")
+leaktest2["App"].astype("category")
+leaktest2["Tool"].astype("category")
+leaktest2["Time"] = leaktest2["Time"].str.replace(" ","0").str.lstrip().str.rstrip()
+leaktest2["Date"] = leaktest2["Date"].str.replace("-",":") + ":"
+leaktest2["DateTime"] = leaktest2["Date"] + leaktest2["Time"]
+leaktest2["DateTime"] = pd.to_datetime(leaktest2["DateTime"], errors='coerce', format='%Y:%m:%d:%H:%M:%S')
+leaktest2["Angle"] = leaktest2["Angle"].astype("float")
+leaktest2["PTorque"] = leaktest2["PTorque"].astype("float")
+leaktest2.head(25)
+mask1 = leaktest2["DateTime"] > "2020-08-01"
+mask2 = leaktest2["TotalSeconds"] < 500
+cycletime = leaktest2[mask1 & mask2]
+excel_file = pd.ExcelWriter("GA_CycleTime.xlsx")
+cycletime.to_excel(excel_file , index = False , encoding = "utf-8")
+excel_file.save()
+import matplotlib.pyplot as plt
+leaktest2[["Angle"]].plot()
+plt.figure(figsize = (5,2),dpi = 200)
+plt.show()
+plt.style.use("seaborn-paper")
+plt.figure(figsize = (10,2),dpi = 100)
+x = leaktest2["Record No"][-250:-1]
+y = leaktest2["Angle"][-250:-1]
+plt.xlabel("Parts")
+plt.ylabel("Angle")
+plt.title("Angle vs Qty Graph", color = "black", fontdict={"fontname":"Comic Sans MS", 'fontsize':15})
+plt.plot(x,y)
+plt.xticks(leaktest2["Record No"][-250:-1], rotation = "vertical", size = 8)
+plt.yticks([5,25,45,100,200,300])
+plt.grid(which="minor")
+plt.show()
+plt.style.use("seaborn-paper")
+plt.figure(figsize = (10,2),dpi = 100)
+x = leaktest2["Record No"][-500:-250]
+y = leaktest2["Angle"][-500:-250]
+plt.xlabel("Parts")
+plt.ylabel("Angle")
+plt.title("Angle vs Qty Graph", color = "black", fontdict={"fontname":"Comic Sans MS", 'fontsize':15})
+plt.plot(x,y)
+plt.xticks(leaktest2["Record No"][-500:-250], rotation = "vertical", size = 8)
+plt.yticks([5,25,45,100,200,300])
+plt.grid(which="minor")
+plt.show()
+plt.style.use("seaborn-paper")
+plt.figure(figsize = (10,2),dpi = 100)
+x = leaktest2["Record No"][-750:-500]
+y = leaktest2["Angle"][-750:-500]
+plt.xlabel("Parts")
+plt.ylabel("Angle")
+plt.title("Angle vs Qty Graph", color = "black", fontdict={"fontname":"Comic Sans MS", 'fontsize':15})
+plt.plot(x,y)
+plt.xticks(leaktest2["Record No"][-750:-500], rotation = "vertical", size = 8)
+plt.yticks([5,25,45,100,200,300,1000])
+plt.grid(which="minor")
+plt.show()
+plt.style.use("seaborn-paper")
+plt.figure(figsize = (10,2),dpi = 100)
+x = leaktest2["Record No"][-250:-1]
+y = leaktest2["PTorque"][-250:-1]
+plt.xlabel("Parts")
+plt.ylabel("PTorque")
+plt.title("Torque vs Qty Graph", color = "black", fontdict={"fontname":"Comic Sans MS", 'fontsize':15})
+plt.plot(x,y)
+plt.xticks(leaktest2["Record No"][-250:-1], rotation = "vertical", size = 8)
+plt.yticks([5,10,25,30,35,50])
+plt.grid(which="minor")
+plt.show()
+plt.style.use("seaborn-paper")
+plt.figure(figsize = (10,2),dpi = 100)
+x = leaktest2["Record No"][-500:-250]
+y = leaktest2["PTorque"][-500:-250]
+plt.xlabel("Parts")
+plt.ylabel("PTorque")
+plt.title("Torque vs Qty Graph", color = "black", fontdict={"fontname":"Comic Sans MS", 'fontsize':15})
+plt.plot(x,y)
+plt.xticks(leaktest2["Record No"][-500:-250], rotation = "vertical", size = 8)
+plt.yticks([5,10,25,30,35,50])
+plt.grid(which="minor")
+plt.show()
+leaktest2.to_csv("TOC_GA_Report", index = False)
+excel_file = pd.ExcelWriter("TOC_LEAKGA_v1.xlsx")
+leaktest2.to_excel(excel_file , index = False , encoding = "utf-8")
+excel_file.save()
