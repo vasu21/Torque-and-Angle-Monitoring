@@ -1,0 +1,43 @@
+# Import Library
+import pandas as pd
+import datetime as dt
+import matplotlib.pyplot as plt
+# Read Data file
+loss = pd.read_csv("TOC_GA_Report")
+loss["Date"] = loss["Date"].str.replace(":"," ")
+loss["Date"] = pd.to_datetime(loss["Date"])
+loss["DateTime"] = pd.to_datetime(loss["DateTime"])
+loss.head(25)
+# Morning startup loss
+mask1 = loss["Date"] > "2020-08-01"
+mask2 = loss["Time"].between("6:00:01","6:59:00")
+aug_morning = loss[mask1 & mask2]
+aug_morning1 = aug_morning.groupby("Date")
+aug_morning2 = aug_morning1.min()
+# lunch startup loss
+mask3 = loss["Date"] > "2020-08-01"
+mask4 = loss["Time"].between("11:00:01","11:59:00")
+aug_lunch = loss[mask3 & mask4]
+aug_lunch1 = aug_lunch.groupby("Date")
+aug_lunch2 = aug_lunch1.min()
+# shift end loss
+mask5 = loss["Date"] > "2020-08-01"
+mask6 = loss["Time"].between("13:15:01","13:40:00")
+aug_end = loss[mask5 & mask6]
+aug_end1 = aug_end.groupby("Date")
+aug_end2 = aug_end1.max()
+# second shift startup 
+mask7 = loss["Date"] > "2020-08-01"
+mask8 = loss["Time"].between("14:00:01","14:30:00")
+aug_second = loss[mask7 & mask8]
+aug_second1 = aug_second.groupby("Date")
+aug_second2 = aug_second1.min()
+
+# Convert to Excel file
+
+excel_file = pd.ExcelWriter("Aug_Production_analysis.xlsx")
+aug_morning2.to_excel(excel_file , sheet_name = "morning")
+aug_lunch2.to_excel(excel_file , sheet_name = "lunch")
+aug_end2.to_excel(excel_file , sheet_name = "end")
+aug_second2.to_excel(excel_file , sheet_name = "second")
+excel_file.save()
